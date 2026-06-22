@@ -7,7 +7,6 @@ import (
 	"sync"
 
 	"github.com/togo-framework/togo"
-	tqueue "github.com/togo-framework/togo/queue"
 )
 
 func init() {
@@ -19,16 +18,16 @@ func init() {
 
 type memory struct {
 	mu       sync.RWMutex
-	handlers map[string]tqueue.Handler
+	handlers map[string]togo.QueueHandler
 	onError  func(error)
 }
 
 // NewMemory returns an in-process queue.
-func NewMemory(onError func(error)) tqueue.Queue {
-	return &memory{handlers: map[string]tqueue.Handler{}, onError: onError}
+func NewMemory(onError func(error)) togo.Queue {
+	return &memory{handlers: map[string]togo.QueueHandler{}, onError: onError}
 }
 
-func (m *memory) Handle(name string, h tqueue.Handler) {
+func (m *memory) Handle(name string, h togo.QueueHandler) {
 	m.mu.Lock()
 	m.handlers[name] = h
 	m.mu.Unlock()
