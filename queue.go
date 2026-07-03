@@ -6,12 +6,18 @@ import (
 	"context"
 	"sync"
 
+	"github.com/togo-framework/providers"
 	"github.com/togo-framework/togo"
 )
 
 func init() {
 	togo.RegisterProviderFunc("queue", togo.PriorityLate, func(k *togo.Kernel) error {
-		k.Queue = NewMemory(func(err error) { k.Log.Error("queue job failed", "err", err) })
+		// memory is the default backend; a transport backend (queue-nats/
+		// queue-rabbitmq/queue-kafka) takes over k.Queue when selected via
+		// CLI/.env/settings (TOGO_QUEUE_PROVIDER / providers.<queue>.active).
+		if providers.Active(k, providers.CapQueue, "memory") == "memory" {
+			k.Queue = NewMemory(func(err error) { k.Log.Error("queue job failed", "err", err) })
+		}
 		return nil
 	})
 }
